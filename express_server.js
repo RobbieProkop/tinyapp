@@ -3,8 +3,16 @@ const express = require("express");
 const { redirect } = require("express/lib/response");
 const app = express();
 const PORT = 8080;
+const { response } = require("express");
+
+//middleware
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// middleware
+const morgan = require("morgan");
+app.use(morgan("dev"));
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -12,35 +20,49 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+const generateRandomString = () => {
+  // let randomString = "";
+  // const lettersNumbers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  // randomString += Math.random;
+  return Math.random().toString(36).slice(2, 8);
+};
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// app.get("/", (req, res) => {
+//   res.send("Hello!");
+// });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b><body><html>\n");
-});
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
 
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
-});
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b><body><html>\n");
+// });
 
-app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
-});
+// app.get("/set", (req, res) => {
+//   const a = 1;
+//   res.send(`a = ${a}`);
+// });
+
+// app.get("/fetch", (req, res) => {
+//   res.send(`a = ${a}`);
+// });
 
 //adding pages with urls
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send("Ok");
+});
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
 app.get("/urls/:shortURL", (req, res) => {
-  //CHANGE THIS!! something else should be put in longURL:
   const shortURL = req.params.shortURL;
   const templateVars = {
     shortURL: shortURL,
@@ -49,9 +71,13 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
-});
+// catch all for errors
+// app.get("*", (req, res) => {
+//   // response.status(404);
+//   // response.send("my custom 404 page");
+//   // same thing, just shorthand
+//   return response.status(404).send("my custom 404 page");
+// });
 
 //server is now active
 app.listen(PORT, () => {
