@@ -1,3 +1,4 @@
+const { Template } = require("ejs");
 const express = require("express");
 const app = express();
 const PORT = 8080;
@@ -28,6 +29,12 @@ app.get("/set", (req, res) => {
 
 app.get("/fetch", (req, res) => {
   res.send(`a = ${a}`);
+});
+
+//adding pages with urls
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
 });
 
 app.listen(PORT, () => {
