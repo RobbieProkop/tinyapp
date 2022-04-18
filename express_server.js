@@ -1,8 +1,10 @@
 const { Template } = require("ejs");
 const express = require("express");
+const { redirect } = require("express/lib/response");
 const app = express();
 const PORT = 8080;
-
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -37,12 +39,21 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.get("/urls/shortURL", (req, res) => {
+app.get("/urls/:shortURL", (req, res) => {
   //CHANGE THIS!! something else should be put in longURL:
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase };
+  const shortURL = req.params.shortURL;
+  const templateVars = {
+    shortURL: shortURL,
+    longURL: urlDatabase[shortURL],
+  };
   res.render("urls_show", templateVars);
 });
 
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+//server is now active
 app.listen(PORT, () => {
   console.log(`Test App Listening on Port: ${PORT}`);
 });
