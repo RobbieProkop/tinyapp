@@ -9,7 +9,7 @@ const { response } = require("express");
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
-//middleware
+//middleware to parse data
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -19,6 +19,7 @@ const morgan = require("morgan");
 const { cookie } = require("request");
 app.use(morgan("dev"));
 
+//sets the view to ejs
 app.set("view engine", "ejs");
 
 // variable containing urls
@@ -27,7 +28,7 @@ let urlDatabase = {
   b2xVn2: "https://dhamma.org",
 };
 
-// used to generate a random string for the short URL
+// create a random string to use as new shortURL
 const generateRandomString = () => {
   return Math.random().toString(36).slice(2, 8);
 };
@@ -115,7 +116,7 @@ app.get("/404", (req, res) => {
   return res.status(404).send("my custom 404 page");
 });
 
-//server is now active
+// connect to the port
 app.listen(PORT, () => {
   console.log(`Test App Listening on Port: ${PORT}`);
 });
