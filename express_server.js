@@ -5,7 +5,7 @@ const app = express();
 const PORT = 8080;
 const { response } = require("express");
 
-//middleware
+//middleware to parse data
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -13,13 +13,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const morgan = require("morgan");
 app.use(morgan("dev"));
 
+//sets the view to ejs
 app.set("view engine", "ejs");
 
+//object   holding website info
 let urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
 
+// create a random string to use as new shortURL
 const generateRandomString = () => {
   return Math.random().toString(36).slice(2, 8);
 };
@@ -39,6 +42,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
+// a posrt request for
 app.post("/urls/:id", (req, res) => {
   // console.log("Testing");
   const newURL = req.params.id;
@@ -65,6 +69,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// used to open the link that's been passed through
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
@@ -79,7 +84,7 @@ app.get("/u/:shortURL", (req, res) => {
 //   return response.status(404).send("my custom 404 page");
 // });
 
-//server is now active
+// connect to the port
 app.listen(PORT, () => {
   console.log(`Test App Listening on Port: ${PORT}`);
 });
