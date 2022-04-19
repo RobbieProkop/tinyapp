@@ -5,6 +5,9 @@ const app = express();
 const PORT = 8080;
 const { response } = require("express");
 
+//cookies! Yum!
+const cookieParser = require("cookie-parser");
+
 //middleware
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -15,6 +18,7 @@ app.use(morgan("dev"));
 
 app.set("view engine", "ejs");
 
+// variable containing urls
 let urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -24,7 +28,12 @@ const generateRandomString = () => {
   return Math.random().toString(36).slice(2, 8);
 };
 
-//adding pages with urls
+app.post("/login", (req, res) => {
+  const cookie = req.cookie.username;
+  res.redirect("/urls");
+});
+
+//page containing all urls
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   console.log(shortURL);
@@ -32,6 +41,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+// used to tell the brwoser which link to delete when button is clicked
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   console.log("This will delete");
@@ -39,6 +49,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
+// used to edit a URL, then redirects to the urls page
 app.post("/urls/:id", (req, res) => {
   // console.log("Testing");
   const newURL = req.params.id;
@@ -46,16 +57,18 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-// gets
+// asks to GET the urls page from the server
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+// used to get the page to input a new url
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// get the page based on the shorturl
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const templateVars = {
@@ -65,6 +78,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// links externally the shortURL to the actual longURL website
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
