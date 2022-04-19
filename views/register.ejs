@@ -15,13 +15,31 @@
   </head>
   <body>
     <%- include("partials/_header") %>
-    <main>
-      <form action="/register" method="post" class="form-inline m-auto">
-        <div class="form-control">
-          <label for="userRegistration">Sign Up!</label>
-          <input type="email" name="email" />
-          <input type="password" name="password" />
-          <button class="btn btn-primary" type="submit">Submit</button>
+    <main style="margin: 1rem">
+      <form action="/register" method="post" class="form-inline mt-5">
+        <div class="m-auto pb-7">
+          <h3 class="">Sign Up!</h3>
+          <div class="mb-2" style="display: inline-block">
+            <label for="username">Username</label>
+          </div>
+          <div class="mb-2">
+            <input type="username" name="username" placeholder="Username" />
+          </div>
+          <div class="mb-2" style="display: inline-block">
+            <label for="email">Email</label>
+          </div>
+          <div class="mb-2">
+            <input type="email" name="email" placeholder="Email" />
+          </div>
+          <div class="mb-2" style="display: inline-block">
+            <label for="password">Password</label>
+          </div>
+          <div class="mb-3">
+            <input type="password" name="password" placeholder="Password" />
+          </div>
+          <div class="">
+            <button class="btn btn-primary m-auto" type="submit">Submit</button>
+          </div>
         </div>
       </form>
     </main>

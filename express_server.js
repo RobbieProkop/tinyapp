@@ -39,10 +39,27 @@ const generateRandomString = () => {
 // ------------------------------------------------------------
 //POST
 
-app.post("/register", (req, res) => {});
+// id {
+//   id,
+//   email,
+//   password,
+//   username
+// }
+app.post("/register", (req, res) => {
+  const userID = generateRandomString();
+  users[userID] = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password,
+    username: req.body.username,
+  };
+  res.cookie("userID", userID);
+  res.redirect("/urls");
+});
+
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
-  const cookieID = req.body.username;
+  const cookieID = req.body.userID;
   res.cookie("username", cookieID);
   // redirect to a specified page
   res.redirect("/urls");
@@ -94,7 +111,7 @@ app.get("/register", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"],
+    userID: req.cookies["userID"],
   };
   res.render("urls_index", templateVars);
 });
