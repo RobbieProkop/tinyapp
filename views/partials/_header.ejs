@@ -18,8 +18,10 @@
         <a href="/urls/new" class="nav-item nav-link">Create New URL</a>
       </div>
     </div>
-    <form action="/login" method="post" class="form-inline">
-      <div class="form-group m-auto">
+    <!-- these aligator syntax only accept key value pairs, not objects -->
+    <div class="form-group m-auto">
+      <% if (!username) {%>
+      <form action="/login" method="post" class="form-inline">
         <input
           type="text"
           name="username"
@@ -27,7 +29,13 @@
           class="form-control"
         />
         <button class="btn btn-outline-dark ml-3">Login</button>
-      </div>
-    </form>
+      </form>
+      <%} else {%>
+      <form action="/logout" method="post" class="form-inline">
+        <label for="user">Logged In As: <%= username %> </label>
+        <button class="btn btn-outline-dark ml-3">Logout</button>
+      </form>
+      <% } %>
+    </div>
   </nav>
 </header>
