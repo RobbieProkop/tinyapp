@@ -24,7 +24,23 @@
           <a href="/u/<%= shortURL %>" target="_blank"><%= shortURL %></a>
         </p>
       </div>
-      <div class="card-footer text-muted"></div>
+      <div class="card-footer text-muted">
+        <h4 class="card-title">Edit</h4>
+        <form action="/urls/<%= shortURL %>" method="POST" class="form-inline">
+          <div class="form-group m-auto">
+            <label for="longURl">New URL:</label>
+            <input
+              type="text"
+              name="longURL"
+              placeholder="http://example.com"
+              class="form-control"
+              style="width: 300; margin: 1rem"
+            />
+            <button class="btn btn-primary" type="submit">Submit</button>
+          </div>
+        </form>
+      </div>
+      <!-- <div class="card-footer text-muted"></div> -->
     </div>
 
     <!-- bootstrap js -->
