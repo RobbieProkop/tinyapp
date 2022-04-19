@@ -22,17 +22,24 @@ app.use(morgan("dev"));
 //sets the view to ejs
 app.set("view engine", "ejs");
 
-// variable containing urls
+// object containing urls
 let urlDatabase = {
   "9sm5xK": "https://nepallife.org",
   b2xVn2: "https://dhamma.org",
 };
+
+//object to contain users
+const users = {};
 
 // create a random string to use as new shortURL
 const generateRandomString = () => {
   return Math.random().toString(36).slice(2, 8);
 };
 
+// ------------------------------------------------------------
+//POST
+
+app.post("/register", (req, res) => {});
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
   const cookieID = req.body.username;
@@ -74,6 +81,15 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
+// ------------------------------------------------------------
+//GET
+
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: "",
+  };
+  res.render("register", templateVars);
+});
 // asks to GET the urls page from the server
 app.get("/urls", (req, res) => {
   const templateVars = {
