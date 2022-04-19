@@ -81,7 +81,6 @@ app.get("/urls", (req, res) => {
     username: req.cookies["username"],
   };
   res.render("urls_index", templateVars);
-  console.log(req.cookies["username"]);
 });
 
 // used to get the page to input a new url
