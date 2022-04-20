@@ -75,7 +75,10 @@ const emailCheck = (email) => {
 };
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
-  const userID = req.cookies["userID"];
+  if (req.cookie("userID", user.id)) {
+    console.log("You are already signed in");
+    res.redirect("/urls");
+  }
   const password = req.body.password;
   const user = emailCheck(req.body.email);
   if (!user) {
