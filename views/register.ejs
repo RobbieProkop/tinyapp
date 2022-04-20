@@ -15,33 +15,40 @@
   </head>
   <body>
     <%- include("partials/_header") %>
-    <main style="margin: 1rem">
-      <form action="/register" method="post" class="form-inline mt-5">
-        <div class="m-auto pb-7">
-          <h3 class="">Sign Up!</h3>
-          <!-- <div class="mb-2" style="display: inline-block">
-            <label for="username">Username</label>
+    <main>
+      <div class="bg-light text-dark">
+        <form action="/register" method="post" class="form-inline pt-5 pb-5">
+          <div class="m-auto pb-7">
+            <h3 class="">Sign Up!</h3>
+            <!-- <div class="mb-2" style="display: inline-block">
+              <label for="username">Username</label>
+            </div>
+            <div class="mb-2">
+              <input type="username" name="username" placeholder="Username" />
+            </div> -->
+            <div class="mb-2" style="display: inline-block">
+              <label for="email">Email</label>
+            </div>
+            <div class="mb-2">
+              <input type="email" name="email" placeholder="@" />
+            </div>
+            <div class="mb-2" style="display: inline-block">
+              <label for="password">Password</label>
+            </div>
+            <div class="mb-3">
+              <input type="password" name="password" placeholder="%*$!" />
+            </div>
+            <div class="">
+              <button
+                class="btn btn-primary m-auto bg-success text-dark border border-dark"
+                type="submit"
+              >
+                Submit
+              </button>
+            </div>
           </div>
-          <div class="mb-2">
-            <input type="username" name="username" placeholder="Username" />
-          </div> -->
-          <div class="mb-2" style="display: inline-block">
-            <label for="email">Email</label>
-          </div>
-          <div class="mb-2">
-            <input type="email" name="email" placeholder="Email" />
-          </div>
-          <div class="mb-2" style="display: inline-block">
-            <label for="password">Password</label>
-          </div>
-          <div class="mb-3">
-            <input type="password" name="password" placeholder="Password" />
-          </div>
-          <div class="">
-            <button class="btn btn-primary m-auto" type="submit">Submit</button>
-          </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </main>
     <!-- BOotstrap JS -->
     <script
