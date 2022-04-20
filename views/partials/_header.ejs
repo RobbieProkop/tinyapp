@@ -20,8 +20,21 @@
         >
       </div>
     </div>
-    <!-- these aligator syntax only accept key value pairs, not objects -->
+
     <div class="form-group m-auto">
+      <a href="/login"
+        ><button class="btn btn-outline-dark ml-3" type="button">
+          Login
+        </button></a
+      >
+      <a href="/register"
+        ><button class="btn btn-outline-dark ml-3" type="button">
+          Sign Up
+        </button>
+      </a>
+    </div>
+    <!-- these aligator syntax only accept key value pairs, not objects -->
+    <!-- <div class="form-group m-auto">
       <% if (!user) {%>
       <form action="/login" method="post" class="form-inline">
         <input
@@ -30,7 +43,7 @@
           placeholder="Username"
           class="form-control"
         />
-        <button class="btn btn-outline-dark ml-3">Login</button>
+        <button type="button" class="btn btn-outline-dark ml-3">Login</button>
       </form>
       <%} else {%>
       <form action="/logout" method="post" class="form-inline">
@@ -38,6 +51,6 @@
         <button class="btn btn-outline-dark ml-3">Logout</button>
       </form>
       <% } %>
-    </div>
+    </div> -->
   </nav>
 </header>
