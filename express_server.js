@@ -46,12 +46,12 @@ const generateRandomString = () => {
 //   username
 // }
 app.post("/register", (req, res) => {
-  if (!req.body.email || !req.body.password) {
-    res.status(400).send("Please enter a valid Email and Password", 400);
-    // setTimeout(() => {
-    //   res.redirect("/register");
-    // }, 3000);
-  }
+  // if (!req.body.email || !req.body.password) {
+  //   res.status(400).send("Please enter a valid Email and Password", 400);
+  //   // setTimeout(() => {
+  //   //   res.redirect("/register");
+  //   // }, 3000);
+  // }
 
   const userID = generateRandomString();
   users[userID] = {
@@ -60,10 +60,19 @@ app.post("/register", (req, res) => {
     password: req.body.password,
     // username: req.body.username,
   };
-  res.cookie("userID", userID);
-  res.redirect("/urls");
+  if (!users[userID].email || !users[userID].password) {
+    res.status(400).send("Please enter a valid Email and Password", 400);
+  } else {
+    res.cookie("userID", userID);
+    res.redirect("/urls");
+  }
 });
 
+const emailCheck = () => {
+  if (!users[userID].email || !users[userID].password) {
+    res.status(400).send("Please enter a valid Email and Password", 400);
+  }
+};
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
   const userID = req.cookies["userID"];
