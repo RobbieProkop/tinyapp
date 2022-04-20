@@ -22,7 +22,12 @@ app.use(morgan("dev"));
 app.set("view engine", "ejs");
 
 // object containing urls
-let urlDatabase = {
+//original for potential use
+// const urlDatabase = {
+//   "9sm5xK": "https://nepallife.org",
+//   b2xVn2: "https://dhamma.org",
+// };
+const urlDatabase = {
   "9sm5xK": "https://nepallife.org",
   b2xVn2: "https://dhamma.org",
 };
@@ -75,10 +80,10 @@ const emailCheck = (email) => {
 };
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
-  if (req.cookie("userID", user.id)) {
-    console.log("You are already signed in");
-    res.redirect("/urls");
-  }
+  // if (req.cookie("userID", user.id)) {
+  //   console.log("You are already signed in");
+  //   res.redirect("/urls");
+  // }
   const password = req.body.password;
   const user = emailCheck(req.body.email);
   if (!user) {
@@ -129,6 +134,11 @@ app.post("/urls/:id", (req, res) => {
 // ------------------------------------------------------------
 //GET
 
+//create an errors page to display specific error cat pictures
+// app.get("/errors", (req, res) => {
+//   res.render("errors");
+// });
+
 app.get("/register", (req, res) => {
   const userID = req.cookies["userID"];
   const user = users[userID];
@@ -141,11 +151,19 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
+  // if (req.cookie("userID", user.id)) {
+  //     // console.log("You are already signed in");
+  //     res.redirect("/urls");
+  //   }
   const userID = req.cookies["userID"];
   const user = users[userID];
   const templateVars = {
     user,
   };
+  if (req.cookies.userID) {
+    res.redirect("/urls");
+  }
+  // securityCheck(req.cookies.userID);
   res.render("login", templateVars);
 });
 // asks to GET the urls page from the server
@@ -156,6 +174,16 @@ app.get("/urls", (req, res) => {
     user,
     urls: urlDatabase,
   };
+  if (!req.cookies.userID) {
+    res.send(
+      "<h2>Please log in first! <br><a href='/login'>Login Here</a></h2>"
+    );
+  }
+
+  //option to redirect instead
+  // if (!req.cookies.userID) {
+  //   res.redirect("/login");
+  // }
   res.render("urls_index", templateVars);
 });
 
@@ -166,6 +194,11 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user,
   };
+  if (!req.cookies.userID) {
+    res.send(
+      "<h2>Please log in first! <br><a href='/login'>Login Here</a></h2>"
+    );
+  }
   res.render("urls_new", templateVars);
 });
 
