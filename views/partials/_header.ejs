@@ -20,7 +20,7 @@
     </div>
     <!-- these aligator syntax only accept key value pairs, not objects -->
     <div class="form-group m-auto">
-      <% if (!username) {%>
+      <% if (!user) {%>
       <form action="/login" method="post" class="form-inline">
         <input
           type="text"
@@ -32,7 +32,7 @@
       </form>
       <%} else {%>
       <form action="/logout" method="post" class="form-inline">
-        <label for="user">Logged In As: <%= username %> </label>
+        <label for="user">Logged In As: <%= user.email %> </label>
         <button class="btn btn-outline-dark ml-3">Logout</button>
       </form>
       <% } %>
