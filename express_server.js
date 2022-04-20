@@ -9,9 +9,8 @@ const { response } = require("express");
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
-//middleware to parse data
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: true }));
+//middleware to parse data -- express has a parser built in
+app.use(express.urlencoded({ extended: true }));
 
 // middleware
 //this logs are status codes and requests. Pretty cool
@@ -33,7 +32,8 @@ const users = {};
 
 // create a random string to use as new shortURL
 const generateRandomString = () => {
-  return Math.random().toString(36).slice(2, 8);
+  // return Math.random().toString(36).slice(2, 8);¥
+  return Math.random().toString(36).substring(2, 8);
 };
 
 // ------------------------------------------------------------
@@ -50,14 +50,24 @@ app.post("/register", (req, res) => {
       email: req.body.email,
       password: req.body.password,
     };
+    // users[id] = user;
+    // console.log(user);
     res.cookie("userID", users[userID].id);
     res.redirect("/urls");
   }
 });
 
+// const emailCheck = (email) => {
+//   for (const userID in users) {
+//     const user = users[userID]
+//     console.log(users[userID]);
+//     if (user.email === email) {
+//       return user;
+//     }
+//   }
+// };
 const emailCheck = (email) => {
   for (const userID in users) {
-    console.log(users[userID]);
     if (users[userID].email === email) {
       return users[userID];
     }
@@ -66,14 +76,17 @@ const emailCheck = (email) => {
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
   const userID = req.cookies["userID"];
+  const password = req.body.password;
   const user = emailCheck(req.body.email);
   if (!user) {
     return res.status(403).send("User cannot be found");
-  } else {
-    console.log(user.password);
+  }
+  // check if password is wrong! but very very unsecure
+  if (user.password !== password) {
+    return res.status(401).send("Incorrect Username Email or Password");
   }
   // const cookieID = req.body.userID;
-  res.cookie("userID", users[userID].id);
+  res.cookie("userID", user.id);
   // redirect to a specified page
   res.redirect("/urls");
 });
@@ -81,10 +94,9 @@ app.post("/login", (req, res) => {
 // for logout (if a cookie is present)
 app.post("/logout", (req, res) => {
   res.clearCookie("userID");
-  //must render a .ejs file to be readable html
-  // .render can send variables to the front end from the server if it is not present in the HTML
+
   // res.render("/urls_index.ejs");
-  res.redirect("/register");
+  res.redirect("/login");
 });
 
 //page containing all urls
@@ -120,6 +132,8 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user,
   };
+  //must render a .ejs file to be readable html
+  // .render can send variables to the front end from the server if it is not present in the HTML
   res.render("register", templateVars);
 });
 
