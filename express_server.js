@@ -46,6 +46,13 @@ const generateRandomString = () => {
 //   username
 // }
 app.post("/register", (req, res) => {
+  if (!req.body.email || !req.body.password) {
+    res.status(400).send("Please enter a valid Email and Password", 400);
+    // setTimeout(() => {
+    //   res.redirect("/register");
+    // }, 3000);
+  }
+
   const userID = generateRandomString();
   users[userID] = {
     id: userID,
