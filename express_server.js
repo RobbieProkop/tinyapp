@@ -127,6 +127,15 @@ app.get("/register", (req, res) => {
   };
   res.render("register", templateVars);
 });
+
+app.get("/login", (req, res) => {
+  const userID = req.cookies["userID"];
+  const user = users[userID];
+  const templateVars = {
+    user,
+  };
+  res.render("login", templateVars);
+});
 // asks to GET the urls page from the server
 app.get("/urls", (req, res) => {
   const userID = req.cookies["userID"];
