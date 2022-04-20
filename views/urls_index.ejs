@@ -33,8 +33,10 @@
         <tbody>
           <% for(let url in urls) { %>
           <tr>
-            <td><%= url %></td>
-            <td>
+            <td class="align-middle">
+              <a href="/u/<%= url %>" target="_blank"><%= url %></a>
+            </td>
+            <td class="align-middle">
               <a href="/u/<%= url %>" target="_blank"><%= urls[url] %></a>
             </td>
             <td>
