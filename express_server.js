@@ -22,18 +22,39 @@ app.use(morgan("dev"));
 app.set("view engine", "ejs");
 
 // object containing urls
-//original for potential use
-// const urlDatabase = {
-//   "9sm5xK": "https://nepallife.org",
-//   b2xVn2: "https://dhamma.org",
-// };
 const urlDatabase = {
-  "9sm5xK": "https://nepallife.org",
-  b2xVn2: "https://dhamma.org",
+  "9sm5xK": {
+    longURL: "https://nepallife.org",
+    userID: "9sm5xK",
+  },
+  b2xVn2: {
+    longURL: "https://dhamma.org",
+    userID: "b2xVn2",
+  },
 };
 
 //object to contain users
 const users = {};
+
+// helper function to verify email
+const emailCheck = (email) => {
+  for (const userID in users) {
+    if (users[userID].email === email) {
+      return users[userID];
+    }
+  }
+};
+
+// helper function to search through the urls of specific users
+const urlsForUsers = (id) => {
+  let urls = {};
+  for (const shortURL in urlDatabase) {
+    if (id === urlDatabase[shortURL].userID) {
+      urls[shortURL] = urlDatabase[shortURL].longURL;
+    }
+  }
+  return urls;
+};
 
 // create a random string to use as new shortURL
 const generateRandomString = () => {
@@ -62,22 +83,6 @@ app.post("/register", (req, res) => {
   }
 });
 
-// const emailCheck = (email) => {
-//   for (const userID in users) {
-//     const user = users[userID]
-//     console.log(users[userID]);
-//     if (user.email === email) {
-//       return user;
-//     }
-//   }
-// };
-const emailCheck = (email) => {
-  for (const userID in users) {
-    if (users[userID].email === email) {
-      return users[userID];
-    }
-  }
-};
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
   // if (req.cookie("userID", user.id)) {
@@ -109,13 +114,15 @@ app.post("/logout", (req, res) => {
 
 //page containing all urls
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();
-  console.log(shortURL);
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`);
+  const newURL = generateRandomString();
+  urlDatabase[newURL] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["userID"],
+  };
+  res.redirect(`/urls/${newURL}`);
 });
 
-// used to tell the brwoser which link to delete when button is clicked
+// used to tell the browser which link to delete when button is clicked
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   console.log("This will delete");
@@ -125,9 +132,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // used to edit a URL, then redirects to the urls page
 app.post("/urls/:id", (req, res) => {
-  // console.log("Testing");
-  const newURL = req.params.id;
-  urlDatabase[newURL] = req.body.longURL;
+  const shortURL = req.params.id;
+  urlDatabase[shortURL].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
@@ -139,6 +145,7 @@ app.post("/urls/:id", (req, res) => {
 //   res.render("errors");
 // });
 
+// renders and gets the register page
 app.get("/register", (req, res) => {
   const userID = req.cookies["userID"];
   const user = users[userID];
@@ -150,6 +157,7 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+// renders and gets the login page
 app.get("/login", (req, res) => {
   // if (req.cookie("userID", user.id)) {
   //     // console.log("You are already signed in");
@@ -168,17 +176,19 @@ app.get("/login", (req, res) => {
 });
 // asks to GET the urls page from the server
 app.get("/urls", (req, res) => {
+  if (!req.cookies.userID) {
+    return res
+      .status(401)
+      .send(
+        "<h2>Please log in first! <br><a href='/login'>Login Here</a></h2>"
+      );
+  }
   const userID = req.cookies["userID"];
   const user = users[userID];
   const templateVars = {
     user,
-    urls: urlDatabase,
+    urls: urlsForUsers(userID),
   };
-  if (!req.cookies.userID) {
-    res.send(
-      "<h2>Please log in first! <br><a href='/login'>Login Here</a></h2>"
-    );
-  }
 
   //option to redirect instead
   // if (!req.cookies.userID) {
@@ -211,7 +221,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     user,
     shortURL: shortURL,
-    longURL: urlDatabase[shortURL],
+    longURL: urlDatabase[shortURL].longURL,
   };
   res.render("urls_show", templateVars);
 });
@@ -219,7 +229,7 @@ app.get("/urls/:shortURL", (req, res) => {
 // links externally the shortURL to the actual longURL website
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
