@@ -4,10 +4,27 @@ const { redirect } = require("express/lib/response");
 const app = express();
 const PORT = process.env.PORT || 8080;
 const { response } = require("express");
+re;
 
-//cookies! Yum!
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
+//cookies! Yum! this encrypt cookies
+const cookieSession = require("cookie-session");
+//testing cookies. change to random secret later
+app.use(
+  cookieSession({
+    name: "userID",
+    keys: ["longstringtomakesurecookiesessionworks1234"],
+  })
+);
+// app.use(
+//   cookieSession({
+//     name: "user_id",
+//     keys: [
+//       /*secret keys */
+//     ],
+//     //cookie options for age
+//     maxAge: 24 * 60 * 60 * 1000, //24 hours
+//   })
+// );
 
 //middleware to parse data -- express has a parser built in
 app.use(express.urlencoded({ extended: true }));
@@ -19,6 +36,7 @@ app.use(morgan("dev"));
 
 //password hashing
 const bcrypt = require("bcryptjs");
+const salt = bcrypt.genSaltSync(10);
 
 //sets the view to ejs
 app.set("view engine", "ejs");
@@ -68,7 +86,7 @@ const generateRandomString = () => {
 //POST
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const hashedPassword = bcrypt.hashSync(password, salt);
   //if no email or password has been passed, throw na error
   if (!email || !hashedPassword) {
     res.status(400).send("Please enter a valid Email and Password", 400);
@@ -80,8 +98,9 @@ app.post("/register", (req, res) => {
     users[userID] = {
       id: userID,
       email,
-      hashedPassword,
+      password: hashedPassword,
     };
+    console.log("req session line 101", req.session["secret"]);
     res.cookie("userID", users[userID].id);
     res.redirect("/urls");
   }
@@ -97,7 +116,7 @@ app.post("/login", (req, res) => {
     return res.status(401).send("Incorrect Email or Password");
   }
   // check if password is wrong! but very very unsecure
-  bcrypt.compareSync(password, hashedPassword);
+  if (!bcrypt.compareSync(password, hashedPassword));
   if (user.password !== password) {
     return res.status(401).send("Incorrect Email or Password");
   }
@@ -107,6 +126,7 @@ app.post("/login", (req, res) => {
 
 // for logout (if a cookie is present)
 app.post("/logout", (req, res) => {
+  // delete req.session.userID;
   res.clearCookie("userID");
   res.redirect("/login");
 });
@@ -116,8 +136,9 @@ app.post("/urls", (req, res) => {
   const newURL = generateRandomString();
   urlDatabase[newURL] = {
     longURL: req.body.longURL,
-    userID: req.cookies["userID"],
+    userID: req.session["userID"],
   };
+  console.log({ userID });
   res.redirect(`/urls/${newURL}`);
 });
 
@@ -139,10 +160,10 @@ app.post("/urls/:id", (req, res) => {
 //GET
 // renders and gets the register page
 app.get("/register", (req, res) => {
-  if (req.cookies.userID) {
+  if (req.session.user_id) {
     res.redirect("/urls");
   }
-  const userID = req.cookies["userID"];
+  const userID = req.session["userID"];
   const user = users[userID];
   const templateVars = {
     user,
@@ -152,10 +173,11 @@ app.get("/register", (req, res) => {
 
 // renders and gets the login page
 app.get("/login", (req, res) => {
-  if (req.cookies.userID) {
+  if (req.session.userID) {
     res.redirect("/urls");
   }
-  const userID = req.cookies["userID"];
+  console.log("userID cookie", req.session.userID);
+  const userID = req.session["userID"];
   const user = users[userID];
   const templateVars = {
     user,
@@ -164,21 +186,22 @@ app.get("/login", (req, res) => {
 });
 // asks to GET the urls page from the server
 app.get("/urls", (req, res) => {
-  if (!req.cookies.userID) {
+  console.log("res.session cookie line 185", req.session);
+  if (!req.session.user_id) {
     return res
       .status(401)
       .send(
         "<h2>Please log in first!</h2><br><h3><a href='/login'>Login Here</a></h3><h3><a href='/register'>Sign Up here</a></h3>"
       );
   }
-  const userID = req.cookies["userID"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   const templateVars = {
     user,
     urls: urlsForUsers(userID),
   };
 
-  //option to redirect instead
+  //option to redirect instead of throwin an error
   // if (!req.cookies.userID) {
   //   res.redirect("/login");
   // }
@@ -187,14 +210,14 @@ app.get("/urls", (req, res) => {
 
 // used to get the page to input a new url
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies.userID) {
+  if (!req.session.user_id) {
     res
       .status(401)
       .send(
         "<h2>Please log in first!</h2><br><h3><a href='/login'>Login Here</a></h3><h3><a href='/register'>Sign Up here</a></h3>"
       );
   }
-  const userID = req.cookies["userID"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   const templateVars = {
     user,
@@ -205,7 +228,7 @@ app.get("/urls/new", (req, res) => {
 // get the page based on the shorturl
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  const userID = req.cookies["userID"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   if (!urlDatabase[shortURL]) {
     return res.status(401).send("<h2>Please enter a valid link!</h2>");
