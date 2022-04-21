@@ -17,6 +17,9 @@ const morgan = require("morgan");
 const { cookie } = require("request");
 app.use(morgan("dev"));
 
+//password hashing
+const bcrypt = require("bcryptjs");
+
 //sets the view to ejs
 app.set("view engine", "ejs");
 
@@ -65,8 +68,9 @@ const generateRandomString = () => {
 //POST
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   //if no email or password has been passed, throw na error
-  if (!email || !password) {
+  if (!email || !hashedPassword) {
     res.status(400).send("Please enter a valid Email and Password", 400);
   } else if (emailCheck(email)) {
     //has the email already been registered?
@@ -76,7 +80,7 @@ app.post("/register", (req, res) => {
     users[userID] = {
       id: userID,
       email,
-      password,
+      hashedPassword,
     };
     res.cookie("userID", users[userID].id);
     res.redirect("/urls");
@@ -86,12 +90,14 @@ app.post("/register", (req, res) => {
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const user = emailCheck(email);
   //check if a correct user (email) has been passed through
   if (!user) {
     return res.status(401).send("Incorrect Email or Password");
   }
   // check if password is wrong! but very very unsecure
+  bcrypt.compareSync(password, hashedPassword);
   if (user.password !== password) {
     return res.status(401).send("Incorrect Email or Password");
   }
@@ -227,5 +233,5 @@ app.get("*", (req, res) => {
 
 // connect to the port
 app.listen(PORT, () => {
-  console.log(`Test App Listening on Port: ${PORT}`);
+  console.log(`TinyApp Listening on Port: ${PORT}`);
 });
