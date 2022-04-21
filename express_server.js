@@ -48,6 +48,7 @@ const emailCheck = (email) => {
 // helper function to search through the urls of specific users
 const urlsForUsers = (id) => {
   let urls = {};
+  //used to filter the urls in the urlDatabase to flatten the urlDatabase
   for (const shortURL in urlDatabase) {
     if (id === urlDatabase[shortURL].userID) {
       urls[shortURL] = urlDatabase[shortURL].longURL;
@@ -58,26 +59,25 @@ const urlsForUsers = (id) => {
 
 // create a random string to use as new shortURL
 const generateRandomString = () => {
-  // return Math.random().toString(36).slice(2, 8);¥
+  // return Math.random().toString(36).slice(2, 8);
   return Math.random().toString(36).substring(2, 8);
 };
 
 // ------------------------------------------------------------
 //POST
 app.post("/register", (req, res) => {
-  if (!req.body.email || !req.body.password) {
+  const { email, password } = req.body;
+  if (!email || !password) {
     res.status(400).send("Please enter a valid Email and Password", 400);
-  } else if (emailCheck(req.body.email)) {
+  } else if (emailCheck(email)) {
     return res.status(400).send("Email already exists");
   } else {
     const userID = generateRandomString();
     users[userID] = {
       id: userID,
-      email: req.body.email,
-      password: req.body.password,
+      email,
+      password,
     };
-    // users[id] = user;
-    // console.log(user);
     res.cookie("userID", users[userID].id);
     res.redirect("/urls");
   }
@@ -85,18 +85,14 @@ app.post("/register", (req, res) => {
 
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
-  // if (req.cookie("userID", user.id)) {
-  //   console.log("You are already signed in");
-  //   res.redirect("/urls");
-  // }
-  const password = req.body.password;
-  const user = emailCheck(req.body.email);
+  const { email, password } = req.body;
+  const user = emailCheck(email);
   if (!user) {
-    return res.status(403).send("User cannot be found");
+    return res.status(401).send("Incorrect Email or Password");
   }
   // check if password is wrong! but very very unsecure
   if (user.password !== password) {
-    return res.status(401).send("Incorrect Username Email or Password");
+    return res.status(401).send("Incorrect Email or Password");
   }
   // const cookieID = req.body.userID;
   res.cookie("userID", user.id);
@@ -107,8 +103,6 @@ app.post("/login", (req, res) => {
 // for logout (if a cookie is present)
 app.post("/logout", (req, res) => {
   res.clearCookie("userID");
-
-  // res.render("/urls_index.ejs");
   res.redirect("/login");
 });
 
@@ -124,8 +118,7 @@ app.post("/urls", (req, res) => {
 
 // used to tell the browser which link to delete when button is clicked
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  console.log("This will delete");
+  const { shortURL } = req.params;
   delete urlDatabase[shortURL];
   res.redirect(`/urls`);
 });
@@ -147,6 +140,9 @@ app.post("/urls/:id", (req, res) => {
 
 // renders and gets the register page
 app.get("/register", (req, res) => {
+  if (req.cookies.userID) {
+    res.redirect("/urls");
+  }
   const userID = req.cookies["userID"];
   const user = users[userID];
   const templateVars = {
@@ -159,19 +155,14 @@ app.get("/register", (req, res) => {
 
 // renders and gets the login page
 app.get("/login", (req, res) => {
-  // if (req.cookie("userID", user.id)) {
-  //     // console.log("You are already signed in");
-  //     res.redirect("/urls");
-  //   }
+  if (req.cookies.userID) {
+    res.redirect("/urls");
+  }
   const userID = req.cookies["userID"];
   const user = users[userID];
   const templateVars = {
     user,
   };
-  if (req.cookies.userID) {
-    res.redirect("/urls");
-  }
-  // securityCheck(req.cookies.userID);
   res.render("login", templateVars);
 });
 // asks to GET the urls page from the server
@@ -180,7 +171,7 @@ app.get("/urls", (req, res) => {
     return res
       .status(401)
       .send(
-        "<h2>Please log in first! <br><a href='/login'>Login Here</a></h2>"
+        "<h2>Please log in first!</h2><br><h3><a href='/login'>Login Here</a></h3><h3><a href='/register'>Sign Up here</a></h3>"
       );
   }
   const userID = req.cookies["userID"];
@@ -199,24 +190,29 @@ app.get("/urls", (req, res) => {
 
 // used to get the page to input a new url
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies.userID) {
+    res
+      .status(401)
+      .send(
+        "<h2>Please log in first!</h2><br><h3><a href='/login'>Login Here</a></h3><h3><a href='/register'>Sign Up here</a></h3>"
+      );
+  }
   const userID = req.cookies["userID"];
   const user = users[userID];
   const templateVars = {
     user,
   };
-  if (!req.cookies.userID) {
-    res.send(
-      "<h2>Please log in first! <br><a href='/login'>Login Here</a></h2>"
-    );
-  }
   res.render("urls_new", templateVars);
 });
 
 // get the page based on the shorturl
 app.get("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
+  const { shortURL } = req.params;
   const userID = req.cookies["userID"];
   const user = users[userID];
+  if (!urlDatabase[shortURL]) {
+    return res.status(401).send("<h2>Please enter a valid link!</h2>");
+  }
   //creating an object
   const templateVars = {
     user,
@@ -228,17 +224,15 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // links externally the shortURL to the actual longURL website
 app.get("/u/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
+  const { shortURL } = req.params;
+  const { longURL } = urlDatabase[shortURL];
   res.redirect(longURL);
 });
 
 // catch all for errors
-app.get("/404", (req, res) => {
-  // response.status(404);
-  // response.send("my custom 404 page");
-  // same thing, just shorthand
-  return res.status(404).send("my custom 404 page");
+app.get("*", (req, res) => {
+  res.redirect("/register");
+  // return res.status(404).send("my custom 404 page");
 });
 
 // connect to the port

@@ -24,6 +24,7 @@
           <a href="/u/<%= shortURL %>" target="_blank"><%= shortURL %></a>
         </p>
       </div>
+      <% if (user) {%>
       <div class="card-footer text-muted">
         <h4 class="card-title">Edit</h4>
         <form action="/urls/<%= shortURL %>" method="POST" class="form-inline">
@@ -40,6 +41,7 @@
           </div>
         </form>
       </div>
+      <% } %>
       <!-- <div class="card-footer text-muted"></div> -->
     </div>
     <%- include("partials/_footer") %>
