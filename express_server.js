@@ -4,7 +4,6 @@ const { redirect } = require("express/lib/response");
 const app = express();
 const PORT = process.env.PORT || 8080;
 const { response } = require("express");
-re;
 
 //cookies! Yum! this encrypt cookies
 const cookieSession = require("cookie-session");
@@ -12,20 +11,9 @@ const cookieSession = require("cookie-session");
 app.use(
   cookieSession({
     name: "userID",
-    keys: ["longstringtomakesurecookiesessionworks1234"],
+    keys: ["longStringToMakeCookieSecure"],
   })
 );
-// app.use(
-//   cookieSession({
-//     name: "user_id",
-//     keys: [
-//       /*secret keys */
-//     ],
-//     //cookie options for age
-//     maxAge: 24 * 60 * 60 * 1000, //24 hours
-//   })
-// );
-
 //middleware to parse data -- express has a parser built in
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,45 +40,23 @@ const urlDatabase = {
     userID: "b2xVn2",
   },
 };
-
-//object to contain users
 const users = {};
 
-// helper function to verify email
-const emailCheck = (email) => {
-  for (const userID in users) {
-    if (users[userID].email === email) {
-      return users[userID];
-    }
-  }
-};
-
-// helper function to search through the urls of specific users
-const urlsForUsers = (id) => {
-  let urls = {};
-  //used to filter the urls in the urlDatabase to flatten the urlDatabase
-  for (const shortURL in urlDatabase) {
-    if (id === urlDatabase[shortURL].userID) {
-      urls[shortURL] = urlDatabase[shortURL].longURL;
-    }
-  }
-  return urls;
-};
-
-// create a random string to use as new shortURL
-const generateRandomString = () => {
-  return Math.random().toString(36).substring(2, 8);
-};
-
+// import helper funcitons
+const {
+  emailCheck,
+  urlsForUsers,
+  generateRandomString,
+} = require("./helpers/userHelpers");
 // ------------------------------------------------------------
 //POST
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, salt);
   //if no email or password has been passed, throw na error
-  if (!email || !hashedPassword) {
-    res.status(400).send("Please enter a valid Email and Password", 400);
-  } else if (emailCheck(email)) {
+  if (!email || !password) {
+    res.status(400).send("Please enter a valid Email and Password");
+  } else if (emailCheck(email, users)) {
     //has the email already been registered?
     return res.status(400).send("Email already exists");
   } else {
@@ -100,8 +66,7 @@ app.post("/register", (req, res) => {
       email,
       password: hashedPassword,
     };
-    console.log("req session line 101", req.session["secret"]);
-    res.cookie("userID", users[userID].id);
+    req.session.userID = users[userID].id;
     res.redirect("/urls");
   }
 });
@@ -109,25 +74,22 @@ app.post("/register", (req, res) => {
 //for login (if no cookie is present)
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const user = emailCheck(email);
+  const user = emailCheck(email, users);
   //check if a correct user (email) has been passed through
-  if (!user) {
+  if (!user || !password) {
     return res.status(401).send("Incorrect Email or Password");
   }
   // check if password is wrong! but very very unsecure
-  if (!bcrypt.compareSync(password, hashedPassword));
-  if (user.password !== password) {
+  if (!bcrypt.compareSync(password, user.password)) {
     return res.status(401).send("Incorrect Email or Password");
   }
-  res.cookie("userID", user.id);
+  req.session.userID = user.id;
   res.redirect("/urls");
 });
 
 // for logout (if a cookie is present)
 app.post("/logout", (req, res) => {
-  // delete req.session.userID;
-  res.clearCookie("userID");
+  req.session = null;
   res.redirect("/login");
 });
 
@@ -136,21 +98,25 @@ app.post("/urls", (req, res) => {
   const newURL = generateRandomString();
   urlDatabase[newURL] = {
     longURL: req.body.longURL,
-    userID: req.session["userID"],
+    userID: req.session.userID,
   };
-  console.log({ userID });
   res.redirect(`/urls/${newURL}`);
 });
 
 // used to tell the browser which link to delete when button is clicked
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const userID = req.session.userID;
   const { shortURL } = req.params;
+  if (userID !== urlDatabase[shortURL].userID) {
+    return console.log("Unathorized delete");
+  }
   delete urlDatabase[shortURL];
   res.redirect(`/urls`);
 });
 
 // used to edit a URL, then redirects to the urls page
 app.post("/urls/:id", (req, res) => {
+  if (!req.session.userID) res.status(401).send("Unauthorized link");
   const shortURL = req.params.id;
   urlDatabase[shortURL].longURL = req.body.longURL;
   res.redirect("/urls");
@@ -160,78 +126,66 @@ app.post("/urls/:id", (req, res) => {
 //GET
 // renders and gets the register page
 app.get("/register", (req, res) => {
-  if (req.session.user_id) {
-    res.redirect("/urls");
-  }
-  const userID = req.session["userID"];
+  if (req.session.userID) res.redirect("/urls");
+  const userID = req.session.userID;
   const user = users[userID];
-  const templateVars = {
-    user,
-  };
+  const templateVars = { user };
   res.render("register", templateVars);
 });
 
 // renders and gets the login page
 app.get("/login", (req, res) => {
-  if (req.session.userID) {
-    res.redirect("/urls");
-  }
+  if (req.session.userID) res.redirect("/urls");
   console.log("userID cookie", req.session.userID);
-  const userID = req.session["userID"];
+  const userID = req.session.userID;
   const user = users[userID];
-  const templateVars = {
-    user,
-  };
+  const templateVars = { user };
   res.render("login", templateVars);
 });
 // asks to GET the urls page from the server
 app.get("/urls", (req, res) => {
   console.log("res.session cookie line 185", req.session);
-  if (!req.session.user_id) {
+  if (!req.session.userID) {
     return res
       .status(401)
       .send(
         "<h2>Please log in first!</h2><br><h3><a href='/login'>Login Here</a></h3><h3><a href='/register'>Sign Up here</a></h3>"
       );
   }
-  const userID = req.session["user_id"];
+  const userID = req.session.userID;
   const user = users[userID];
   const templateVars = {
     user,
-    urls: urlsForUsers(userID),
+    urls: urlsForUsers(userID, urlDatabase),
   };
-
-  //option to redirect instead of throwin an error
-  // if (!req.cookies.userID) {
-  //   res.redirect("/login");
-  // }
   res.render("urls_index", templateVars);
 });
 
 // used to get the page to input a new url
 app.get("/urls/new", (req, res) => {
-  if (!req.session.user_id) {
+  if (!req.session.userID) {
     res
       .status(401)
       .send(
         "<h2>Please log in first!</h2><br><h3><a href='/login'>Login Here</a></h3><h3><a href='/register'>Sign Up here</a></h3>"
       );
   }
-  const userID = req.session["user_id"];
+  const userID = req.session.userID;
   const user = users[userID];
-  const templateVars = {
-    user,
-  };
+  const templateVars = { user };
   res.render("urls_new", templateVars);
 });
 
 // get the page based on the shorturl
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  const userID = req.session["user_id"];
+  const userID = req.session.userID;
   const user = users[userID];
   if (!urlDatabase[shortURL]) {
     return res.status(401).send("<h2>Please enter a valid link!</h2>");
+  }
+  if (userID !== urlDatabase[shortURL].userID) {
+    return res.status(401).send("<h2>Unauthorized Link!</h2>");
   }
   //creating an object
   const templateVars = {
@@ -250,11 +204,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 // catch all for errors
-app.get("*", (req, res) => {
-  res.redirect("/register");
-});
+app.get("*", (req, res) => res.redirect("/register"));
 
 // connect to the port
-app.listen(PORT, () => {
-  console.log(`TinyApp Listening on Port: ${PORT}`);
-});
+app.listen(PORT, () => console.log(`TinyApp Listening on Port: ${PORT}`));

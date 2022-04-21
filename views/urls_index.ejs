@@ -42,7 +42,9 @@
             </td>
             <td>
               <button class="btn btn-outline-secondary">
-                <% new Date(); %>
+                <% const date = new Date(); const day = date.getDay(); const
+                month = date.getMonth(); const year = date.getFullYear(); const
+                dateStr = `${day}/${month}/${year}`; %> <%=dateStr%>
               </button>
             </td>
             <td>
