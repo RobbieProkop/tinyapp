@@ -12,8 +12,7 @@ app.use(cookieParser());
 //middleware to parse data -- express has a parser built in
 app.use(express.urlencoded({ extended: true }));
 
-// middleware
-//this logs are status codes and requests. Pretty cool
+//middleware -- this logs are status codes and requests. Pretty cool
 const morgan = require("morgan");
 const { cookie } = require("request");
 app.use(morgan("dev"));
@@ -59,7 +58,6 @@ const urlsForUsers = (id) => {
 
 // create a random string to use as new shortURL
 const generateRandomString = () => {
-  // return Math.random().toString(36).slice(2, 8);
   return Math.random().toString(36).substring(2, 8);
 };
 
@@ -67,9 +65,11 @@ const generateRandomString = () => {
 //POST
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
+  //if no email or password has been passed, throw na error
   if (!email || !password) {
     res.status(400).send("Please enter a valid Email and Password", 400);
   } else if (emailCheck(email)) {
+    //has the email already been registered?
     return res.status(400).send("Email already exists");
   } else {
     const userID = generateRandomString();
@@ -87,6 +87,7 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const user = emailCheck(email);
+  //check if a correct user (email) has been passed through
   if (!user) {
     return res.status(401).send("Incorrect Email or Password");
   }
@@ -94,9 +95,7 @@ app.post("/login", (req, res) => {
   if (user.password !== password) {
     return res.status(401).send("Incorrect Email or Password");
   }
-  // const cookieID = req.body.userID;
   res.cookie("userID", user.id);
-  // redirect to a specified page
   res.redirect("/urls");
 });
 
@@ -132,12 +131,6 @@ app.post("/urls/:id", (req, res) => {
 
 // ------------------------------------------------------------
 //GET
-
-//create an errors page to display specific error cat pictures
-// app.get("/errors", (req, res) => {
-//   res.render("errors");
-// });
-
 // renders and gets the register page
 app.get("/register", (req, res) => {
   if (req.cookies.userID) {
@@ -148,8 +141,6 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user,
   };
-  //must render a .ejs file to be readable html
-  // .render can send variables to the front end from the server if it is not present in the HTML
   res.render("register", templateVars);
 });
 
@@ -232,7 +223,6 @@ app.get("/u/:shortURL", (req, res) => {
 // catch all for errors
 app.get("*", (req, res) => {
   res.redirect("/register");
-  // return res.status(404).send("my custom 404 page");
 });
 
 // connect to the port
