@@ -4,11 +4,11 @@ TinyApp is a clone of bit.ly and tinyapp full stack web application built with N
 
 ## Final Product
 
-!["Sign up page"](./docs/1.Signup.png)
-!["initial home page upon signing up"](./docs/2.blank_url_home_page.png)
-!["creat the tiny url"](./docs/3.create_tiny_url.png)
-!["tiny url has been created"](./docs/4.short_url.png)
-!["home page with new tiny urls"](./docs/5.urls_home_page.png)
+!["Sign up page"](https://github.com/RobbieProkop/tinyapp/blob/master/docs/1.Signup.png)
+!["initial home page upon signing up"](https://github.com/RobbieProkop/tinyapp/blob/master/docs/2.blank_url_home_page.png)
+!["creat the tiny url"](https://github.com/RobbieProkop/tinyapp/blob/master/docs/3.create_tiny_url.png)
+!["tiny url has been created"](https://github.com/RobbieProkop/tinyapp/blob/master/docs/4.short_url.png)
+!["home page with new tiny urls"](https://github.com/RobbieProkop/tinyapp/blob/master/docs/5.urls_home_page.png)
 
 ## Dependencies
 
