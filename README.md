@@ -19,6 +19,7 @@ TinyApp is a clone of bit.ly and tinyapp full stack web application built with N
 - body-parser
 - cookie-session
 - morgan
+- mocha chai (for testing)
 - Nodemon (optional)
 
 ## Getting Started
