@@ -136,7 +136,6 @@ app.get("/register", (req, res) => {
 // renders and gets the login page
 app.get("/login", (req, res) => {
   if (req.session.userID) res.redirect("/urls");
-  console.log("userID cookie", req.session.userID);
   const userID = req.session.userID;
   const user = users[userID];
   const templateVars = { user };
@@ -144,7 +143,6 @@ app.get("/login", (req, res) => {
 });
 // asks to GET the urls page from the server
 app.get("/urls", (req, res) => {
-  console.log("res.session cookie line 185", req.session);
   if (!req.session.userID) {
     return res
       .status(401)
