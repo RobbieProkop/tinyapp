@@ -20,8 +20,12 @@
   <body>
     <%- include("partials/_header") %>
     <main style="margin: 1rem">
-      <h3>Create TinyURL</h3>
-      <form action="/urls" method="POST" class="form-inline">
+      <h3 class="d-flex justify-content-center">Create TinyURL</h3>
+      <form
+        action="/urls"
+        method="POST"
+        class="form-inline d-flex justify-content-center"
+      >
         <div class="form-group mb-2">
           <label for="longURL">Enter a URL:</label>
           <input

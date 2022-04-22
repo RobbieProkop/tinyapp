@@ -21,7 +21,7 @@
     <%- include("partials/_header") %>
     <main>
       <div class="bg-light text-dark">
-        <form action="/login" method="post" class="form-inline pt-5 pb-5">
+        <form action="/login" method="post" class="form-inline pt-5 pb-4">
           <div
             class="border border-dark m-auto"
             style="padding: 2rem 3rem 3rem 2rem"
@@ -87,6 +87,10 @@
             </div>
           </div>
         </form>
+        <p class="text-dark text-center">
+          If you don't have an account, please
+          <a href="/register">Signup Here</a>
+        </p>
       </div>
     </main>
     <%- include("partials/_footer") %>
